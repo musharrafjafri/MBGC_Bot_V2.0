@@ -8,12 +8,13 @@ from selenium.webdriver.common.keys import Keys
 from tableData import table_data_func as tdf
 from selenium.webdriver.chrome.options import Options
 from time_list import time_list_fun as tlf
-options = webdriver.ChromeOptions()
-options.add_argument('start-maximized')
-options.add_experimental_option("useAutomationExtension", False)
-options.add_experimental_option("excludeSwitches", ["enable-automation"])
-driver = webdriver.Chrome(options=options)
-driver.maximize_window()
+
+# options = webdriver.ChromeOptions()
+# options.add_argument('start-maximized')
+# options.add_experimental_option("useAutomationExtension", False)
+# options.add_experimental_option("excludeSwitches", ["enable-automation"])
+# driver = webdriver.Chrome(options=options)
+# driver.maximize_window()
 
 
 # In this function Chrome driver loaded in driver and clicked on Agree button.
@@ -89,7 +90,7 @@ def is_course_available_fun():
         courses = driver.find_element_by_id('AvailCourse')
         # Now if courses available so our desire course "Day Golf (18 Holes)" is available or not.
         for course in courses.find_elements_by_tag_name('a'):
-            if course.text == "Night Golf (9 Holes)":
+            if course.text == "Day Golf (18 Holes)":
                 course.click()
                 print(">>>>>CONGRATS, DAY GOLF (18 HOLES) IS AVAILABLE...")
                 desire_course = True
@@ -158,36 +159,28 @@ def times_fun():
 
 # This is main function in which all function call for process the BOT
 def main_fun():
-    driver_flag = False
-    date_flag = False
-    course_flag = False
-    time_flag = False
-    book_flag = False
-
-
-
-
-
-    while driver_flag == False:
+    global booked_flag
+    for dr_num in range(2):
         try:
             driver_fun()  # Load the driver and click on Agree Button.
             print(">>>>>Driver loaded...")
-            driver_flag = True
+            break
         except:
             print(">>>>>Waiting for driver to load")
+
     sleep(1)
 
-    while date_flag == False:
+    for dd_num in range(2):
         try:
             if desire_date_fun():  # If date is available in current month than just click on that desire date.
                 pass
             else:  # If date is not in current month than run the next month function.
                 next_month_fun()
-            date_flag = True
+            break
         except:
-            print(">>>>>Date function is wrong trying to fix it please wait...")
+            print(">>>>>There is a problem in date function, trying to fix it please wait...")
 
-    while course_flag == False:
+    for c_num in range(2):
         try:
             while is_course_available_fun() == False:  # Run this loop while courses appear on page or our specific (Day Golf (18 Holes) course.
                 print(">>>>>TRYING TO FIND COURSE, PLEASE WAIT...")  # Printing this line until find the desire course.
@@ -198,13 +191,12 @@ def main_fun():
                 else:  # If date is not in current month than run the next month function.
                     next_month_fun()
                 is_course_available_fun()
-            course_flag = True
+            break
         except:
-            print(">>>>>Course function is wrong trying to fix it please wait...")
+            print(">>>>>There is a problem in course function, trying to fix it please wait...")
 
     sleep(1)
-
-    while time_flag == False:
+    for d_num in range(2):
         try:
             desire_time_id = times_fun()  # get desire time ids that is available or not.
             if desire_time_id != []:  # If desire time ids is not Null than move ahead
@@ -213,15 +205,26 @@ def main_fun():
                     print(">>>>>TRYING TO FIND TIMSLOT WHICH IS NOT BOOKED, PLEASE WAIT...")  # print this line until timeslot unhold.
                     times_fun()  # run time function again.
                     is_time_hold_fun()  # check if time is still on hold or it is ready for book.
-                    time_flag = True
+                booked_flag = True
             else:
-                print(">>>>>TIME IS NOT AVAILABLE...")  # if desire time is not availble in all timeslots than print this line.
-                driver.execute_script("window.alert('Time between 08:00 to 12:00 is not available, Try again later...');")  # if desire time is not availble in all timeslots than this popup message show on browser.
+                print(">>>>>There is no timeslot available between 07:00 to 13:00, Try again later...")  # if desire time is not availble in all timeslots than print this line.
+                driver.execute_script("window.alert('There is no timeslot available between 07:00 to 13:00, Try again later...');")  # if desire time is not availble in all timeslots than this popup message show on browser.
+            break
         except:
-            print(">>>>Timing function is wrong trying to fix it please wait...")
+            print(">>>>There is a problem in timeslot function, trying to fix it please wait...")
+
 
 print("--------------------->>>>>>>>>><<<<<<<<<<----------------------")
 print(">>>>>BOT IS STARTING...")
-main_fun()  # Run main function to execute BOT.
+booked_flag = False
+while not booked_flag:
+    options = webdriver.ChromeOptions()
+    options.add_argument('start-maximized')
+    options.add_experimental_option("useAutomationExtension", False)
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    driver = webdriver.Chrome(options=options)
+    driver.maximize_window()
+    main_fun()  # Run main function to execute BOT.
+
 print(">>>>>BOT stopped...")
 print("--------------------->>>>>>>>>><<<<<<<<<<----------------------")
