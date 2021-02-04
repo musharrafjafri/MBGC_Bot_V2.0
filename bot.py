@@ -89,9 +89,9 @@ def is_course_available_fun():
         courses = driver.find_element_by_id('AvailCourse')
         # Now if courses available so our desire course "Day Golf (18 Holes)" is available or not.
         for course in courses.find_elements_by_tag_name('a'):
-            if course.text == "Day Golf (18 Holes)":
+            if course.text == "Night Golf (9 Holes)":
                 course.click()
-                print("--------CONGRATS, DAY GOLF (18 HOLES) IS AVAILABLE.--------")
+                print(">>>>>CONGRATS, DAY GOLF (18 HOLES) IS AVAILABLE...")
                 desire_course = True
                 break
             else:
@@ -122,7 +122,7 @@ def is_time_hold_fun():
                 if time_slot.get_attribute('data-tee-time') in desire_time_ids:  # checkif timeslot's id is matched with our desire time ids.
                     if time_slot.get_attribute('class') != 'ui button slots tee-time golfer_book holdGolfer':  # If it above statement matched than checked if it is not hold.
                         booked_time = time_slot.get_attribute('data-tee')  # Here we get our booked time which is booked by this function it used only for print to know what time is it.
-                        print("----Selected time is: ", booked_time, " proceed with Player's detail.----")  # Here we print the booked time.
+                        print(">>>>>Selected time is: ", booked_time, " proceed with Player's detail...")  # Here we print the booked time.
                         element_to_hover_over = time_slot  # now in next three lines we use hover function to visible book button.
                         hover = ActionChains(driver).move_to_element(element_to_hover_over)
                         hover.perform()
@@ -155,39 +155,73 @@ def times_fun():
     return desire_time_ids
 
 
+
 # This is main function in which all function call for process the BOT
 def main_fun():
-    driver_fun()  # Load the driver and click on Agree Button.
+    driver_flag = False
+    date_flag = False
+    course_flag = False
+    time_flag = False
+    book_flag = False
+
+
+
+
+
+    while driver_flag == False:
+        try:
+            driver_fun()  # Load the driver and click on Agree Button.
+            print(">>>>>Driver loaded...")
+            driver_flag = True
+        except:
+            print(">>>>>Waiting for driver to load")
     sleep(1)
-    if desire_date_fun():  # If date is available in current month than just click on that desire date.
-        pass
-    else:  # If date is not in current month than run the next month function.
-        next_month_fun()
-    while is_course_available_fun() == False:  # Run this loop while courses appear on page or our specific (Day Golf (18 Holes) course.
-        print("----TRYING TO FIND COURSE, PLEASE WAIT...----")  # Printing this line until find the desire course.
-        driver.refresh()  # refresh page and run funcitons agian.
-        sleep(1)
-        if desire_date_fun():  # If date is available in current month than just click on that desire date.
-            pass
-        else:  # If date is not in current month than run the next month function.
-            next_month_fun()
-        is_course_available_fun()
+
+    while date_flag == False:
+        try:
+            if desire_date_fun():  # If date is available in current month than just click on that desire date.
+                pass
+            else:  # If date is not in current month than run the next month function.
+                next_month_fun()
+            date_flag = True
+        except:
+            print(">>>>>Date function is wrong trying to fix it please wait...")
+
+    while course_flag == False:
+        try:
+            while is_course_available_fun() == False:  # Run this loop while courses appear on page or our specific (Day Golf (18 Holes) course.
+                print(">>>>>TRYING TO FIND COURSE, PLEASE WAIT...")  # Printing this line until find the desire course.
+                driver.refresh()  # refresh page and run funcitons agian.
+                sleep(1)
+                if desire_date_fun():  # If date is available in current month than just click on that desire date.
+                    pass
+                else:  # If date is not in current month than run the next month function.
+                    next_month_fun()
+                is_course_available_fun()
+            course_flag = True
+        except:
+            print(">>>>>Course function is wrong trying to fix it please wait...")
 
     sleep(1)
-    desire_time_id = times_fun()  # get desire time ids that is available or not.
-    if desire_time_id != []:  # If desire time ids is not Null than move ahead
-        is_time_hold_fun()  # Run hold time function.
-        while is_time_hold_fun():  # if desire time is on hold than run this loop until find the timeslot unhold.
-            print("----TRYING TO FIND TIMSLOT WHICH IS NOT BOOKED, PLEASE WAIT...----")  # print this line until timeslot unhold.
-            times_fun()  # run time function again.
-            is_time_hold_fun()  # check if time is still on hold or it is ready for book.
-    else:
-        print("----TIME IS NOT AVAILABLE----")  # if desire time is not availble in all timeslots than print this line.
-        driver.execute_script("window.alert('Time between 08:00 to 12:00 is not available, Try again later...');")  # if desire time is not availble in all timeslots than this popup message show on browser.
 
+    while time_flag == False:
+        try:
+            desire_time_id = times_fun()  # get desire time ids that is available or not.
+            if desire_time_id != []:  # If desire time ids is not Null than move ahead
+                is_time_hold_fun()  # Run hold time function.
+                while is_time_hold_fun():  # if desire time is on hold than run this loop until find the timeslot unhold.
+                    print(">>>>>TRYING TO FIND TIMSLOT WHICH IS NOT BOOKED, PLEASE WAIT...")  # print this line until timeslot unhold.
+                    times_fun()  # run time function again.
+                    is_time_hold_fun()  # check if time is still on hold or it is ready for book.
+                    time_flag = True
+            else:
+                print(">>>>>TIME IS NOT AVAILABLE...")  # if desire time is not availble in all timeslots than print this line.
+                driver.execute_script("window.alert('Time between 08:00 to 12:00 is not available, Try again later...');")  # if desire time is not availble in all timeslots than this popup message show on browser.
+        except:
+            print(">>>>Timing function is wrong trying to fix it please wait...")
 
-print("---------------------******************----------------------")
-print("---------------------BOT IS STARTING...---------------------")
+print("--------------------->>>>>>>>>><<<<<<<<<<----------------------")
+print(">>>>>BOT IS STARTING...")
 main_fun()  # Run main function to execute BOT.
-print("---------------------BOT IS REACHED AT THE END.---------------------")
-print("---------------------**************************----------------------")
+print(">>>>>BOT stopped...")
+print("--------------------->>>>>>>>>><<<<<<<<<<----------------------")
