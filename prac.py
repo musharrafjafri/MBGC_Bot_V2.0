@@ -54,7 +54,7 @@ def next_month_fun():
 def desire_date_fun():
     c_row = 0
     c_column = 0
-    c_date = current_date_fun(1)
+    c_date = current_date_fun()
     for row in range(1, 6):  # take all calendar's rows
         for column in range(1, 8):  # take all calendar's column
             current_date_pos = driver.find_element_by_xpath(
@@ -135,7 +135,7 @@ def is_time_hold_fun():
                         break
                     else:
                         incompl_flag = True  # True this flag to continue loop to getting desire time.
-                        hold_flag = False  # True this flag to continue loop to wait for unhold timeslot.
+                        hold_flag = True  # True this flag to continue loop to wait for unhold timeslot.
     return incompl_flag
 
 
@@ -182,8 +182,8 @@ def main_fun():
 
     for c_num in range(2):
         try:
+            print(">>>>>TRYING TO FIND COURSE, PLEASE WAIT...")  # Printing this line until find the desire course.
             while is_course_available_fun() == False:  # Run this loop while courses appear on page or our specific (Day Golf (18 Holes) course.
-                print(">>>>>TRYING TO FIND COURSE, PLEASE WAIT...")  # Printing this line until find the desire course.
                 driver.refresh()  # refresh page and run funcitons agian.
                 sleep(1)
                 if desire_date_fun():  # If date is available in current month than just click on that desire date.
@@ -200,19 +200,25 @@ def main_fun():
         try:
             desire_time_id = times_fun()  # get desire time ids that is available or not.
             if desire_time_id != []:  # If desire time ids is not Null than move ahead
-                is_time_hold_fun()  # Run hold time function.
-                while is_time_hold_fun():  # if desire time is on hold than run this loop until find the timeslot unhold.
-                    print(">>>>>TRYING TO FIND TIMSLOT WHICH IS NOT BOOKED, PLEASE WAIT...")  # print this line until timeslot unhold.
-                    times_fun()  # run time function again.
-                    is_time_hold_fun()  # check if time is still on hold or it is ready for book.
-                booked_flag = True
+                print(">>>>>TRYING TO FIND TIMSLOT WHICH IS NOT BOOKED, PLEASE WAIT...")
+                time_hold_flag = is_time_hold_fun()  # Run hold time function.
+                # while time_hold_flag:  # if desire time is on hold than run this loop until find the timeslot unhold.
+                #     print(">>>>>TRYING TO FIND TIMSLOT WHICH IS NOT BOOKED, PLEASE WAIT...")  # print this line until timeslot unhold.
+                #     times_fun()  # run time function again.
+                #     is_time_hold_fun()  # check if time is still on hold or it is ready for book.
             else:
                 print(">>>>>There is no timeslot available between 07:00 to 13:00, Try again later...")  # if desire time is not availble in all timeslots than print this line.
                 driver.execute_script("window.alert('There is no timeslot available between 07:00 to 13:00, Try again later...');")  # if desire time is not availble in all timeslots than this popup message show on browser.
+            if not time_hold_flag:
+                booked_flag = True
             break
         except:
-            print(">>>>There is a problem in timeslot function, trying to fix it please wait...")
+            print(">>>>>There is a problem in timeslot function, trying to fix it please wait...")
 
+    if not booked_flag:
+        driver.quit()
+
+time1 = input()
 
 print("--------------------->>>>>>>>>><<<<<<<<<<----------------------")
 print(">>>>>BOT IS STARTING...")
@@ -220,6 +226,7 @@ booked_flag = False
 while not booked_flag:
     options = webdriver.ChromeOptions()
     options.add_argument('start-maximized')
+    options.add_argument("--log-level=3")
     options.add_experimental_option("useAutomationExtension", False)
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     driver = webdriver.Chrome(options=options)
